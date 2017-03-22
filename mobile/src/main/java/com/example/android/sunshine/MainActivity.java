@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements
         ForecastAdapter.ForecastAdapterOnClickHandler {
     private GoogleApiClient client;
     private String nodeId;
-    private static final long CONNECTION_TIME_OUT_MS = 100;
+    private static final long CONNECTION_TIME_OUT_MS = 1000;
     private static final String MESSAGE = "Hello Wear!";
 
     private final String TAG = MainActivity.class.getSimpleName();
@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // sending the toast to the wear
         initApi();
-        sendToast();
+        //sendToast();
 
     }
 
@@ -370,6 +370,8 @@ public class MainActivity extends AppCompatActivity implements
                     public void onConnected(Bundle bundle) {
                         Log.v("connected ..","connected");
 
+                            sendToast();
+
                     }
 
                     @Override
@@ -420,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements
         client = getGoogleApiClient(this);
         client.connect();
         retrieveDeviceNode();
+
     }
 
 
