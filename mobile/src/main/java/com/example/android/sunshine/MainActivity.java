@@ -418,6 +418,7 @@ public class MainActivity extends AppCompatActivity implements
     private void initApi() {
         Log.v("init api","init api");
         client = getGoogleApiClient(this);
+        client.connect();
         retrieveDeviceNode();
     }
 
