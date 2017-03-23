@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -64,6 +66,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
     static String highTemp,lowTemp;
+    static byte[] weatherIconByteArray = new byte[0];
+   static Bitmap weatherBitmap;
 
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
@@ -147,7 +151,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             mTextPaint = new Paint();
             mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
-
+            mTextPaint.setFakeBoldText(true);
             mCalendar = Calendar.getInstance();
             googleApiClient = new GoogleApiClient.Builder(SunshineWatchFace.this)
                     .addApi(Wearable.API)
@@ -220,6 +224,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
             mTextPaint.setTextSize(textSize);
+
         }
 
         @Override
@@ -308,9 +313,12 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             String timeHrMinutes = new SimpleDateFormat("HH:mm", Locale.ENGLISH).format(now);
 
 
-            canvas.drawText(timeHrMinutes, mXOffset, mYOffset - 30, mTextPaint);
-            canvas.drawText(dayMonthYear, mXOffset, mYOffset, mTextPaint);
-            canvas.drawText(highTemp + "  " + lowTemp,mXOffset+20, mYOffset+30, mTextPaint);
+            canvas.drawText(timeHrMinutes, bounds.centerX(), bounds.centerY(), mTextPaint);
+            canvas.drawText(dayMonthYear, bounds.centerX() - 200, bounds.centerY()+mYOffset, mTextPaint);
+            canvas.drawText(highTemp + "  " + lowTemp,bounds.exactCenterX()-50, bounds.exactCenterY()+2*mYOffset, mTextPaint);
+            if (weatherBitmap != null) {
+                canvas.drawBitmap( weatherBitmap, bounds.centerX() - 50, bounds.centerY() + 50, mTextPaint);
+            }
         }
 
         /**
@@ -375,6 +383,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
                            highTemp =  dataMap.getString("tempHigh");
                            lowTemp =  dataMap.getString("tempLow");
+                            weatherIconByteArray = dataMap.getByteArray("weatherId");
+                            weatherBitmap = BitmapFactory.decodeByteArray(weatherIconByteArray, 0, weatherIconByteArray.length);
+
 
 
                         }
