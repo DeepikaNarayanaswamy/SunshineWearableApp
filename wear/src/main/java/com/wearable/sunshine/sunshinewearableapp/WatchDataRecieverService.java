@@ -15,10 +15,11 @@ public class WatchDataRecieverService extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         Log.v("message recieved","message received");
-        showToast(messageEvent.getPath());
+        String message = new String(messageEvent.getData());
+        Log.v("message = ",message);
     }
-
+/*
     private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
+        //Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }*/
 }

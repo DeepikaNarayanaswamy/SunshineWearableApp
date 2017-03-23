@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void onConnected(Bundle bundle) {
                         Log.v("connected ..","connected");
 
-                            sendToast();
+
 
                     }
 
@@ -390,13 +390,15 @@ public class MainActivity extends AppCompatActivity implements
             public void run() {
                 client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
                 NodeApi.GetConnectedNodesResult result =
-                        Wearable.NodeApi.getConnectedNodes(client).await();
+                        Wearable.NodeApi.getConnectedNodes(client).await(CONNECTION_TIME_OUT_MS,TimeUnit.MILLISECONDS);
+
                 List<Node> nodes = result.getNodes();
                 if (nodes.size() > 0) {
                     Log.v("nodes = ",nodes.size()+"");
                     nodeId = nodes.get(0).getId();
+                    sendToast();
                 }
-                client.disconnect();
+                //client.disconnect();
             }
         }).start();
     }
@@ -410,7 +412,8 @@ public class MainActivity extends AppCompatActivity implements
                     @Override
                     public void run() {
                         client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                        Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE, null);
+                        // Not using any prefix for the Wearable Listener service
+                        Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE,null);
                         client.disconnect();
                     }
                 }).start();
@@ -422,6 +425,7 @@ public class MainActivity extends AppCompatActivity implements
         client = getGoogleApiClient(this);
         client.connect();
         retrieveDeviceNode();
+
 
     }
 
