@@ -413,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void run() {
                         client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
                         // Not using any prefix for the Wearable Listener service
-                        Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE,null);
+                        Wearable.MessageApi.sendMessage(client, nodeId, "./WatchDataReciever",MESSAGE.getBytes());
                         client.disconnect();
                     }
                 }).start();
