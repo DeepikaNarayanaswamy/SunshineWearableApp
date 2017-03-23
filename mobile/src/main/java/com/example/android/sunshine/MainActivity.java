@@ -33,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
@@ -406,7 +407,10 @@ public class MainActivity extends AppCompatActivity implements
 
                     PutDataMapRequest mapRequest = PutDataMapRequest.create("/weather_data");
                     DataMap map = mapRequest.getDataMap();
-                    map.putString("tempMin","10.00");
+                    TextView highTemp = (TextView) findViewById(R.id.high_temperature);
+                    map.putString("tempHigh",highTemp.getText().toString());
+                    TextView lowTemp = (TextView) findViewById(R.id.low_temperature);
+                    map.putString("tempLow",lowTemp.getText().toString());
 
                     map.putLong("time", new Date().getTime());
 

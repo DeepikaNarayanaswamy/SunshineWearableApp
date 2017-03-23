@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 public class SunshineWatchFace extends CanvasWatchFaceService {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+    static String highTemp,lowTemp;
 
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
@@ -309,7 +310,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             canvas.drawText(timeHrMinutes, mXOffset, mYOffset - 30, mTextPaint);
             canvas.drawText(dayMonthYear, mXOffset, mYOffset, mTextPaint);
-
+            canvas.drawText(highTemp + "  " + lowTemp,mXOffset+20, mYOffset+30, mTextPaint);
         }
 
         /**
@@ -372,7 +373,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
                         if (path.equals("/weather_data")) {
 
-                            Log.v("data min temp =", dataMap.getString("tempMin"));
+                           highTemp =  dataMap.getString("tempHigh");
+                           lowTemp =  dataMap.getString("tempLow");
 
 
                         }
