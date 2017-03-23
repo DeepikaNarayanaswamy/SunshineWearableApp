@@ -25,6 +25,7 @@ import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.NotificationUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.net.URL;
 
@@ -38,6 +39,12 @@ public class SunshineSyncTask {
      *
      * @param context Used to access utility methods and the ContentResolver
      */
+
+    private GoogleApiClient client;
+    private String nodeId;
+    private static final long CONNECTION_TIME_OUT_MS = 1000;
+    private static final String MESSAGE = "Hello Wear!";
+
     synchronized public static void syncWeather(Context context) {
 
         try {
@@ -104,6 +111,11 @@ public class SunshineSyncTask {
                     NotificationUtils.notifyUserOfNewWeather(context);
                 }
 
+
+
+                // Here we have to send the message to the wear.
+
+
             /* If the code reaches this point, we have successfully performed our sync */
 
             }
@@ -112,5 +124,8 @@ public class SunshineSyncTask {
             /* Server probably invalid */
             e.printStackTrace();
         }
+
+
+
     }
 }

@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -37,10 +38,16 @@ import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.sync.SunshineSyncUtils;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -396,7 +403,29 @@ public class MainActivity extends AppCompatActivity implements
                 if (nodes.size() > 0) {
                     Log.v("nodes = ",nodes.size()+"");
                     nodeId = nodes.get(0).getId();
-                    sendToast();
+
+                    PutDataMapRequest mapRequest = PutDataMapRequest.create("/weather_data");
+                    DataMap map = mapRequest.getDataMap();
+                    map.putString("tempMin","10.00");
+
+                    map.putLong("time", new Date().getTime());
+
+                    PutDataRequest request = mapRequest.asPutDataRequest();
+                    request.setUrgent();
+                    Wearable.DataApi.putDataItem(client, request)
+                            .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                                @Override
+                                public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
+                                    if(!dataItemResult.getStatus().isSuccess()) {
+                                        Log.e(TAG, "Failed to send weather data");
+                                    } else {
+                                        Log.d(TAG, "Successfully sent weather data");
+                                    }
+                                }
+                            });
+
+
+
                 }
                 //client.disconnect();
             }
@@ -413,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements
                     public void run() {
                         client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
                         // Not using any prefix for the Wearable Listener service
-                        Wearable.MessageApi.sendMessage(client, nodeId, "./WatchDataReciever",MESSAGE.getBytes());
+                        Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE,null);
                         client.disconnect();
                     }
                 }).start();

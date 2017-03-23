@@ -18,11 +18,9 @@ public class WatchDataRecieverService extends WearableListenerService {
         String message = new String(messageEvent.getPath());
         Log.v("message = ",message);
 
-        String message1 = new String(messageEvent.getData());
-        Log.v("message1 = ",message1);
-
 
     }
+
 /*
     private void showToast(String message) {
         //Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

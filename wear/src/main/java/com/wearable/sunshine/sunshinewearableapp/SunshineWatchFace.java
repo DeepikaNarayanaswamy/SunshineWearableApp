@@ -29,12 +29,23 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.Wearable;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -64,6 +75,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
      */
     private static final int MSG_UPDATE_TIME = 0;
 
+
     @Override
     public Engine onCreateEngine() {
         return new Engine();
@@ -89,7 +101,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         }
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
+    private class Engine extends CanvasWatchFaceService.Engine implements  GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         boolean mRegisteredTimeZoneReceiver = false;
         Paint mBackgroundPaint;
@@ -113,6 +126,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
+        GoogleApiClient googleApiClient;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -133,6 +148,12 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
 
             mCalendar = Calendar.getInstance();
+            googleApiClient = new GoogleApiClient.Builder(SunshineWatchFace.this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            googleApiClient.connect();
         }
 
         @Override
@@ -215,7 +236,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         @Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
             super.onAmbientModeChanged(inAmbientMode);
-            Log.v("Ambient mode changed","ambient to interactive");
+            Log.v("Ambient mode changed", "ambient to interactive");
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
@@ -286,7 +307,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             String timeHrMinutes = new SimpleDateFormat("HH:mm", Locale.ENGLISH).format(now);
 
 
-            canvas.drawText(timeHrMinutes,mXOffset,mYOffset-30,mTextPaint);
+            canvas.drawText(timeHrMinutes, mXOffset, mYOffset - 30, mTextPaint);
             canvas.drawText(dayMonthYear, mXOffset, mYOffset, mTextPaint);
 
         }
@@ -322,5 +343,44 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
             }
         }
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+            Log.v("Connection achieved", "COnnection achieved");
+            Wearable.DataApi.addListener(googleApiClient, onDataChangedListener);
+
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.v("Connection suspended", "COnnection suspended");
+        }
+
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+            Log.v("Connection failed", "COnnection failed");
+        }
+
+        private final DataApi.DataListener onDataChangedListener = new DataApi.DataListener() {
+            @Override
+            public void onDataChanged(DataEventBuffer dataEvents) {
+                Log.d("wear data", "Wear data changed");
+                for (DataEvent event : dataEvents) {
+                    if (event.getType() == DataEvent.TYPE_CHANGED) {
+                        DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
+                        String path = event.getDataItem().getUri().getPath();
+
+                        if (path.equals("/weather_data")) {
+
+                            Log.v("data min temp =", dataMap.getString("tempMin"));
+
+
+                        }
+                    }
+                }
+            }
+
+            ;
+        };
     }
 }
